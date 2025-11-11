@@ -1,30 +1,36 @@
 services:
-  - type: web
+  - type: worker
     name: ttn-influx
     runtime: node
     plan: free
     region: singapore
 
     repo: https://github.com/mirza4509044-ship-it/ttn-influx
+
     buildCommand: "npm install"
     startCommand: "node index.js"
 
     envVars:
       - key: INFLUX_URL
-        sync: false
+        value: "https://eu-central-1-1.aws.cloud2.influxdata.com"
+
       - key: INFLUX_TOKEN
-        sync: false
+        value: "NOB93u1L4-eOCqcGusVgXZCPEfNcR3qu_4mo-GE3zS227VJIjVyeBS5jUC9QwgPEh0RlNbVXY_I8HPWuLYGeVA=="
+
       - key: INFLUX_ORG
-        sync: false
+        value: "srsp_lorawan_mobair"
+
       - key: INFLUX_BUCKET
-        sync: false
+        value: "ttn_data"
 
       - key: TTN_MQTT_SERVER
-        sync: false
+        value: "mqtts://au1.cloud.thethings.network:8883"
+
       - key: TTN_USERNAME
-        sync: false
+        value: "srsp-lorawan@ttn"
+
       - key: TTN_PASSWORD
-        sync: false
+        value: "NNSXS.HJPE2DIFYQNZBWCQBKHJIMU7LPPB4WZATW4OIXQ.RMADM4HTKOP7MH4HKM4L7IB3GYLKBK334SKPSEXKZCBISUUYYW4Q"
 
     autoDeployTrigger: commit
 
