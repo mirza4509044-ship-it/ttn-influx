@@ -1,9 +1,10 @@
 services:
-  - type: web
+  - type: worker
     name: ttn-influx-bridge
     env: node
-    region: singapore        # closest to South Asia (recommended)
+    region: singapore
     plan: free
+
     buildCommand: "npm install"
     startCommand: "node index.js"
 
@@ -23,3 +24,4 @@ services:
         value: "srsp-lorawan@ttn"
       - key: TTN_PASSWORD
         value: "NNSXS.HJPE2DIFYQNZBWCQBKHJIMU7LPPB4WZATW4OIXQ.RMADM4HTKOP7MH4HKM4L7IB3GYLKBK334SKPSEXKZCBISUUYYW4Q"
+
