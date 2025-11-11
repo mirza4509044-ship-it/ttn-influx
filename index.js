@@ -3,16 +3,16 @@ import mqtt from "mqtt";
 import { InfluxDB, Point } from "@influxdata/influxdb-client";
 
 // =====================
-// CONFIGURATION
+// CONFIGURATION FROM ENV VARIABLES
 // =====================
-const ttnServer = "mqtts://au1.cloud.thethings.network:8883";
-const ttnUsername = "srsp-lorawan@ttn";
-const ttnPassword = "NNSXS.HJPE2DIFYQNZBWCQBKHJIMU7LPPB4WZATW4OIXQ.RMADM4HTKOP7MH4HKM4L7IB3GYLKBK334SKPSEXKZCBISUUYYW4Q";
+const ttnServer = process.env.TTN_MQTT_SERVER;
+const ttnUsername = process.env.TTN_USERNAME;
+const ttnPassword = process.env.TTN_PASSWORD;
 
-const influxUrl = "https://eu-central-1-1.aws.cloud2.influxdata.com";
-const influxToken = "NOB93u1L4-eOCqcGusVgXZCPEfNcR3qu_4mo-GE3zS227VJIjVyeBS5jUC9QwgPEh0RlNbVXY_I8HPWuLYGeVA==";
-const influxOrg = "srsp_lorawan_mobair";
-const influxBucket = "ttn_data";
+const influxUrl = process.env.INFLUX_URL;
+const influxToken = process.env.INFLUX_TOKEN;
+const influxOrg = process.env.INFLUX_ORG;
+const influxBucket = process.env.INFLUX_BUCKET;
 
 // =====================
 // CONNECT TO INFLUXDB
@@ -24,10 +24,11 @@ writeApi.useDefaultTags({ host: "render-ttn" });
 // =====================
 // CONNECT TO TTN MQTT
 // =====================
+console.log("🔌 Connecting to TTN MQTT...");
 const client = mqtt.connect(ttnServer, {
   username: ttnUsername,
   password: ttnPassword,
-  reconnectPeriod: 5000, // auto reconnect every 5s
+  reconnectPeriod: 5000, // auto reconnect every 5 seconds
 });
 
 client.on("connect", () => {
@@ -47,13 +48,15 @@ client.on("close", () => console.log("⚠️ MQTT Connection closed."));
 // =====================
 client.on("message", (topic, message) => {
   try {
-    const payload = JSON.parse(message.toString());
-    const devId = payload.end_device_ids.device_id;
-    const decoded = payload.uplink_message.decoded_payload;
+    const json = JSON.parse(message.toString());
+    const devId = json.end_device_ids.device_id;
+    const decoded = json.uplink_message?.decoded_payload;
 
     if (!decoded) return;
 
     const point = new Point("air_quality").tag("device", devId);
+
+    // Add all numeric fields dynamically
     for (const [key, value] of Object.entries(decoded)) {
       if (typeof value === "number") {
         point.floatField(key, value);
@@ -62,17 +65,22 @@ client.on("message", (topic, message) => {
 
     writeApi.writePoint(point);
     console.log(`📥 Data written from device: ${devId}`, decoded);
-  } catch (error) {
-    console.error("❌ Error parsing message:", error.message);
+
+  } catch (err) {
+    console.error("⚠️ Error processing message:", err.message);
   }
 });
 
 // =====================
-// GRACEFUL SHUTDOWN
+// SAFE SHUTDOWN
 // =====================
 process.on("SIGINT", async () => {
-  console.log("\n🛑 Disconnecting...");
-  await writeApi.close();
-  client.end();
-  process.exit();
+  console.log("\n🛑 Shutting down...");
+  try {
+    await writeApi.close();
+    client.end();
+  } finally {
+    process.exit(0);
+  }
 });
+
