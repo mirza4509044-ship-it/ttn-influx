@@ -1,6 +1,7 @@
 // index.js
 import mqtt from "mqtt";
 import { InfluxDB, Point } from "@influxdata/influxdb-client";
+import http from "http";   // ✅ added for dummy HTTP server
 
 // =====================
 // CONFIGURATION FROM ENV VARIABLES
@@ -83,4 +84,17 @@ process.on("SIGINT", async () => {
     process.exit(0);
   }
 });
+
+// =====================
+// ✅ DUMMY HTTP SERVER (Fix for Render Free Plan)
+// =====================
+const PORT = process.env.PORT || 10000;
+
+http.createServer((req, res) => {
+  res.writeHead(200);
+  res.end("✅ TTN-Influx Bridge Running");
+}).listen(PORT, () => {
+  console.log("✅ Dummy HTTP server running on port", PORT);
+});
+
 
