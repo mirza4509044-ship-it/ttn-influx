@@ -29,7 +29,7 @@ console.log("🔌 Connecting to TTN MQTT...");
 const client = mqtt.connect(ttnServer, {
   username: ttnUsername,
   password: ttnPassword,
-  reconnectPeriod: 5000, // auto reconnect every 5 seconds
+  reconnectPeriod: 5000,
 });
 
 client.on("connect", () => {
@@ -57,9 +57,18 @@ client.on("message", (topic, message) => {
 
     const point = new Point("air_quality").tag("device", devId);
 
-    // Add all numeric fields dynamically
+    // ✅ Handle pm10 separately (avoid mixing)
+    if (decoded.pm10 !== undefined) {
+      if (devId === "mkrwan-1") {
+        point.floatField("pm10_1", decoded.pm10);
+      } else if (devId === "mkrwan-2") {
+        point.floatField("pm10_2", decoded.pm10);
+      }
+    }
+
+    // ✅ Add all other numeric fields dynamically (excluding pm10)
     for (const [key, value] of Object.entries(decoded)) {
-      if (typeof value === "number") {
+      if (typeof value === "number" && key !== "pm10") {
         point.floatField(key, value);
       }
     }
@@ -96,5 +105,7 @@ http.createServer((req, res) => {
 }).listen(PORT, () => {
   console.log("✅ Dummy HTTP server running on port", PORT);
 });
+
+
 
 
