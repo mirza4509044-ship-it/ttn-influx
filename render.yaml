@@ -1,12 +1,13 @@
 services:
-  - type: worker
+  - type: web
     name: ttn-influx
     runtime: node
-    repo: https://github.com/mirza4509044-ship-it/ttn-influx
     plan: free
     region: singapore
-    buildCommand: npm install
-    startCommand: node index.js
+
+    repo: https://github.com/mirza4509044-ship-it/ttn-influx
+    buildCommand: "npm install"
+    startCommand: "node index.js"
 
     envVars:
       - key: INFLUX_URL
@@ -17,6 +18,7 @@ services:
         sync: false
       - key: INFLUX_BUCKET
         sync: false
+
       - key: TTN_MQTT_SERVER
         sync: false
       - key: TTN_USERNAME
@@ -25,5 +27,6 @@ services:
         sync: false
 
     autoDeployTrigger: commit
+
 
 
