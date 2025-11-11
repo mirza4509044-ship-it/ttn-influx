@@ -1,0 +1,25 @@
+services:
+  - type: web
+    name: ttn-influx-bridge
+    env: node
+    region: singapore        # closest to South Asia (recommended)
+    plan: free
+    buildCommand: "npm install"
+    startCommand: "node index.js"
+
+    envVars:
+      - key: INFLUX_URL
+        value: "https://eu-central-1-1.aws.cloud2.influxdata.com"
+      - key: INFLUX_TOKEN
+        value: "NOB93u1L4-eOCqcGusVgXZCPEfNcR3qu_4mo-GE3zS227VJIjVyeBS5jUC9QwgPEh0RlNbVXY_I8HPWuLYGeVA=="
+      - key: INFLUX_ORG
+        value: "srsp_lorawan_mobair"
+      - key: INFLUX_BUCKET
+        value: "ttn_data"
+
+      - key: TTN_MQTT_SERVER
+        value: "mqtts://au1.cloud.thethings.network:8883"
+      - key: TTN_USERNAME
+        value: "srsp-lorawan@ttn"
+      - key: TTN_PASSWORD
+        value: "NNSXS.HJPE2DIFYQNZBWCQBKHJIMU7LPPB4WZATW4OIXQ.RMADM4HTKOP7MH4HKM4L7IB3GYLKBK334SKPSEXKZCBISUUYYW4Q"
