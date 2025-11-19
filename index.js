@@ -1,6 +1,8 @@
 import mqtt from "mqtt";
 import { InfluxDB, Point } from "@influxdata/influxdb-client";
 import http from "http";
+let lastMQTTOnline = Date.now();
+
 
 // =====================
 // CONFIGURATION FROM ENV VARIABLES
@@ -47,6 +49,7 @@ function startMQTT() {
   });
 
   client.on("connect", () => {
+    lastMQTTOnline = Date.now();   
     console.log("✅ Connected to TTN MQTT broker");
 
     client.subscribe("v3/srsp-lorawan@ttn/devices/+/up", (err) => {
@@ -108,6 +111,16 @@ function startMQTT() {
 
   return client;
 }
+// =====================
+// MQTT SELF-RESTART WATCHDOG (5 minutes)
+// =====================
+setInterval(() => {
+  const offlineMinutes = (Date.now() - lastMQTTOnline) / 60000;
+  if (offlineMinutes > 5) {
+    process.exit(1); // Render restarts automatically
+  }
+}, 30000); // check every 30s
+
 
 // =====================
 // GRACEFUL SHUTDOWN
@@ -126,6 +139,7 @@ process.on("SIGINT", async () => {
 // =====================
 startServer();  // Start HTTP immediately (Render health passes)
 startMQTT();    // Start MQTT after — no effect on uptime
+
 
 
 
