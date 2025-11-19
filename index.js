@@ -130,11 +130,14 @@ process.on("SIGINT", async () => {
 const PORT = process.env.PORT || 10000;
 
 http.createServer((req, res) => {
+  console.log("🔔 UptimeRobot ping received at", new Date().toISOString());
   res.writeHead(200);
-  res.end("✅ TTN-Influx Bridge Running");
+  res.end("Alive");
 }).listen(PORT, () => {
-  console.log(`🌐 HTTP health endpoint running on port ${PORT}`);
+  console.log("✅ Dummy HTTP server running on port", PORT);
 });
+
+
 
 
 
